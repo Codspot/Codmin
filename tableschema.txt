@@ -1,0 +1,21 @@
+create table public.projects (
+  id bigint not null,
+  title text null,
+  client text null,
+  project_type text null,
+  start_date text null,
+  completion_date text null,
+  tags text null,
+  featured_image text null,
+  project_gallery text null,
+  short_desc text null,
+  long_desc text null,
+  status text null,
+  created_at timestamp with time zone null,
+  end_date timestamp without time zone null,
+  keywords text null,
+  meta_desc character varying null,
+  meta_title character varying null,
+  type text null,
+  constraint projects_pkey primary key (id)
+) TABLESPACE pg_default;
