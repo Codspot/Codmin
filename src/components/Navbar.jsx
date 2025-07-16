@@ -121,14 +121,9 @@ export default function Navbar() {
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
       {/* Left: Logo + Title */}
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center shadow-sm">
-          <HiOutlineViewGrid className="text-white text-xl" />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">Portfolio CMS</h1>
-          <p className="text-xs text-gray-500">Content Management</p>
-        </div>
+      <div className="flex flex-col items-start justify-center">
+        <img src={process.env.PUBLIC_URL + '/logo1.png'} alt="Codspot Logo" className="h-8 w-18 mb-1 object-contain" />
+        <span className="text-xs text-gray-500 -mt-1 ml-2">Admin Panel</span>
       </div>
 
       {/* Right: Buttons + Avatar + Notification */}

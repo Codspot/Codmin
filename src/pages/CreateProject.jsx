@@ -1,14 +1,112 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentScreen } from "../store/uiSlice";
+import { setCurrentScreen, setCurrentProjectStep } from "../store/uiSlice";
+import { supabase } from "../supabaseClient";
 
 export default function CreateProject() {
   const dispatch = useDispatch();
   const currentStep = useSelector((state) => state.ui.currentProjectStep);
 
+  // Form state
+  const [title, setTitle] = useState("");
+  const [client, setClient] = useState("");
+  const [type, setType] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
+  const [featuredImage, setFeaturedImage] = useState(null);
+  const [gallery, setGallery] = useState([]);
+  const [shortDesc, setShortDesc] = useState("");
+  const [longDesc, setLongDesc] = useState("");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const featuredInputRef = useRef();
+  const galleryInputRef = useRef();
+
   useEffect(() => {
     dispatch(setCurrentScreen("createProject"));
   }, [dispatch]);
+
+  // Tag input handler
+  const handleTagKeyDown = (e) => {
+    if (e.key === "Enter" && tagInput.trim()) {
+      e.preventDefault();
+      if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+  const removeTag = (tag) => setTags(tags.filter((t) => t !== tag));
+
+  // Image upload handlers
+  const handleFeaturedChange = (e) => {
+    if (e.target.files[0]) setFeaturedImage(e.target.files[0]);
+  };
+  const handleGalleryChange = (e) => {
+    setGallery([...gallery, ...Array.from(e.target.files)]);
+  };
+  const removeGalleryImage = (idx) => {
+    setGallery(gallery.filter((_, i) => i !== idx));
+  };
+
+  // Upload image to Supabase Storage
+  const uploadImage = async (file, folder = "projects") => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substr(2, 8)}.${fileExt}`;
+    const { data, error } = await supabase.storage.from("media").upload(fileName, file, { upsert: false });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from("media").getPublicUrl(fileName);
+    return urlData.publicUrl;
+  };
+
+  // Publish handler
+  const handlePublish = async () => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      let featuredUrl = "";
+      let galleryUrls = [];
+      if (featuredImage) featuredUrl = await uploadImage(featuredImage, "projects/featured");
+      if (gallery.length > 0) {
+        galleryUrls = await Promise.all(gallery.map(img => uploadImage(img, "projects/gallery")));
+      }
+      // Insert project into Supabase
+      const { error: insertError } = await supabase.from("projects").insert([
+        {
+          id: `${Date.now()}`, // Use timestamp as ID
+          title,
+          client,
+          type,
+          start_date: startDate,
+          end_date: endDate,
+          tags: tags.join(","),
+          featured_image: featuredUrl,
+          project_gallery: galleryUrls,
+          short_desc: shortDesc,
+          long_desc: longDesc,
+          meta_title: metaTitle,
+          meta_desc: metaDesc,
+          keywords,
+          status: "Published",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+      if (insertError) throw insertError;
+      setSuccess("Project published successfully!");
+      setTimeout(() => {
+        window.location.href = "/projects";
+      }, 1200); // Wait 1.2s for user to see success
+    } catch (err) {
+      setError(err.message || "Failed to publish project.");
+    }
+    setLoading(false);
+  };
 
   // Render only the current step's section
   let StepContent = null;
@@ -26,17 +124,17 @@ export default function CreateProject() {
         <div className="mt-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Project Title *</label>
-            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter project title" />
+            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter project title" value={title} onChange={e => setTitle(e.target.value)} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Client</label>
-              <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Client name" />
+              <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Client name" value={client} onChange={e => setClient(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Project Type</label>
-              <select className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base">
-                <option>Select type</option>
+              <select className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" value={type} onChange={e => setType(e.target.value)}>
+                <option value="">Select type</option>
                 <option>Web Design</option>
                 <option>Mobile App</option>
                 <option>Branding</option>
@@ -47,20 +145,23 @@ export default function CreateProject() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
-              <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="mm/dd/yyyy" />
+              <input type="date" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Completion Date</label>
-              <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="mm/dd/yyyy" />
+              <input type="date" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Tags</label>
             <div className="flex flex-wrap gap-2 mb-2">
-              <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded flex items-center">UI/UX <span className="ml-1 text-blue-400 cursor-pointer">×</span></span>
-              <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded flex items-center">React <span className="ml-1 text-green-400 cursor-pointer">×</span></span>
+              {tags.map((tag, idx) => (
+                <span key={tag} className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded flex items-center">
+                  {tag} <span className="ml-1 text-blue-400 cursor-pointer" onClick={() => removeTag(tag)}>×</span>
+                </span>
+              ))}
             </div>
-            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Add tags (press Enter)" />
+            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Add tags (press Enter)" value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} />
           </div>
         </div>
       </section>
@@ -79,29 +180,40 @@ export default function CreateProject() {
         <div className="mt-2">
           <label className="block text-sm font-medium text-slate-700 mb-1">Featured Image</label>
           <div className="border-2 border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center py-12 mb-6 relative" style={{ minHeight: '160px' }}>
-            <svg className="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M16 16v-2a4 4 0 00-8 0v2" />
-              <path d="M12 12v4" />
-              <path d="M8 16h8" />
-              <path d="M12 4v4" />
-              <path d="M4 12h16" />
-            </svg>
-            <p className="text-slate-500 mb-1">Drop your featured image here</p>
-            <p className="text-xs text-slate-400 mb-2">PNG, JPG up to 10MB</p>
-            <button className="px-5 py-2 bg-blue-500 text-white rounded font-medium text-sm hover:bg-blue-600 transition">Browse Files</button>
+            {featuredImage ? (
+              <div className="mb-2 flex flex-col items-center">
+                <img src={URL.createObjectURL(featuredImage)} alt="Preview" className="h-24 rounded mb-2 object-cover" />
+                <button className="text-xs text-red-500 underline" onClick={() => setFeaturedImage(null)}>Remove</button>
+              </div>
+            ) : (
+              <>
+                <svg className="w-10 h-10 text-slate-300 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M16 16v-2a4 4 0 00-8 0v2" />
+                  <path d="M12 12v4" />
+                  <path d="M8 16h8" />
+                  <path d="M12 4v4" />
+                  <path d="M4 12h16" />
+                </svg>
+                <p className="text-slate-500 mb-1">Drop your featured image here</p>
+                <p className="text-xs text-slate-400 mb-2">PNG, JPG up to 10MB</p>
+                <button className="px-5 py-2 bg-blue-500 text-white rounded font-medium text-sm hover:bg-blue-600 transition" onClick={() => featuredInputRef.current.click()}>Browse Files</button>
+                <input type="file" accept="image/*" className="hidden" ref={featuredInputRef} onChange={handleFeaturedChange} />
+              </>
+            )}
           </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Project Gallery</label>
           <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg h-32 cursor-pointer text-slate-300 text-3xl">
+            {gallery.map((img, idx) => (
+              <div key={idx} className="relative flex items-center justify-center border border-slate-200 rounded-lg h-32 bg-slate-50 text-slate-300">
+                <img src={URL.createObjectURL(img)} alt="Gallery" className="object-cover w-full h-full rounded" />
+                <button className="absolute top-1 right-1 bg-white text-red-500 rounded-full px-2 py-0.5 text-xs" onClick={() => removeGalleryImage(idx)}>×</button>
+              </div>
+            ))}
+            <div className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg h-32 cursor-pointer text-slate-300 text-3xl" onClick={() => galleryInputRef.current.click()}>
               <span className="text-3xl">+</span>
-            </div>
-            <div className="flex items-center justify-center border border-slate-200 rounded-lg h-32 bg-slate-50 text-slate-300">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M8 16l2-2a2 2 0 012.8 0l2 2" /></svg>
-            </div>
-            <div className="flex items-center justify-center border border-slate-200 rounded-lg h-32 bg-slate-50 text-slate-300">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M8 16l2-2a2 2 0 012.8 0l2 2" /></svg>
+              <input type="file" accept="image/*" multiple className="hidden" ref={galleryInputRef} onChange={handleGalleryChange} />
             </div>
           </div>
         </div>
@@ -121,11 +233,11 @@ export default function CreateProject() {
         <div className="flex-1 flex flex-col gap-6 mt-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Short Description</label>
-            <textarea className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" rows={2} placeholder="Brief overview of your project..." />
+            <textarea className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" rows={2} placeholder="Brief overview of your project..." value={shortDesc} onChange={e => setShortDesc(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Long Description</label>
-            <textarea className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" rows={4} placeholder="Detailed description of your project..." />
+            <textarea className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" rows={4} placeholder="Detailed description of your project..." value={longDesc} onChange={e => setLongDesc(e.target.value)} />
           </div>
         </div>
       </section>
@@ -147,15 +259,15 @@ export default function CreateProject() {
         <div className="mt-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Meta Title</label>
-            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter meta title" />
+            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter meta title" value={metaTitle} onChange={e => setMetaTitle(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Meta Description</label>
-            <textarea className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" rows={3} placeholder="Enter meta description..." />
+            <textarea className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" rows={3} placeholder="Enter meta description..." value={metaDesc} onChange={e => setMetaDesc(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Keywords</label>
-            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter keywords (comma-separated)" />
+            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter keywords (comma-separated)" value={keywords} onChange={e => setKeywords(e.target.value)} />
           </div>
         </div>
       </section>
@@ -167,6 +279,21 @@ export default function CreateProject() {
       <main className="flex-1 overflow-auto">
         <div className="max-w-5xl ml-0 mr-auto p-8">
           {StepContent}
+          {/* Error/Success */}
+          {error && <div className="mt-6 text-red-600 font-semibold">{error}</div>}
+          {success && <div className="mt-6 text-green-600 font-semibold">{success}</div>}
+          {/* Publish button only on last step */}
+          {currentStep === 4 && (
+            <div className="mt-8 flex justify-end">
+              <button
+                className="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-base font-semibold transition disabled:opacity-60"
+                onClick={handlePublish}
+                disabled={loading}
+              >
+                {loading ? "Publishing..." : "Publish Project"}
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>
