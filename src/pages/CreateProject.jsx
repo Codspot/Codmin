@@ -25,6 +25,8 @@ export default function CreateProject() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [url, seturl] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
 
   const featuredInputRef = useRef();
   const galleryInputRef = useRef();
@@ -83,6 +85,7 @@ export default function CreateProject() {
           title,
           client,
           type,
+          url,
           start_date: startDate,
           end_date: endDate,
           tags: tags.join(","),
@@ -93,6 +96,7 @@ export default function CreateProject() {
           meta_title: metaTitle,
           meta_desc: metaDesc,
           keywords,
+          github_url: githubUrl,
           status: "Published",
           created_at: new Date().toISOString(),
         },
@@ -162,6 +166,14 @@ export default function CreateProject() {
               ))}
             </div>
             <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Add tags (press Enter)" value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">URL</label>
+            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter project Url" value={title} onChange={e => seturl(e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">github Url</label>
+            <input type="text" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-slate-900 text-base" placeholder="Enter project Url" value={title} onChange={e => setGithubUrl(e.target.value)} />
           </div>
         </div>
       </section>

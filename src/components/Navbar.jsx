@@ -35,7 +35,7 @@ export default function Navbar() {
             Create New Project
           </h1>
         </div>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <button className="flex items-center px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold transition border border-slate-200">
             <svg
               className="mr-2 w-4 h-4 text-slate-500"
@@ -57,7 +57,7 @@ export default function Navbar() {
             <FaRocket className="mr-2" />
             Publish
           </button>
-        </div>
+        </div> */}
       </header>
     );
   }
@@ -65,7 +65,7 @@ export default function Navbar() {
   // Custom Navbar for /blogs/new
   if (location.pathname.startsWith("/blogs/new")) {
     return (
-     <header className="flex items-center justify-between px-6 py-3 bg-white border border-slate-200 rounded-b-xl rounded-t-none">
+      <header className="flex items-center justify-between px-6 py-3 bg-white border border-slate-200 rounded-b-xl rounded-t-none">
         <div className="flex items-center">
           <button
             className="flex items-center text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 py-1 rounded transition font-medium text-base"

@@ -41,19 +41,17 @@ export default function Sidebar() {
               return (
                 <div
                   key={step.label}
-                  className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer ${
-                    isActive
-                      ? "bg-blue-50 border-blue-200"
-                      : "bg-white border-transparent hover:bg-blue-50 hover:border-blue-200"
-                  }`}
+                  className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer ${isActive
+                    ? "bg-blue-50 border-blue-200"
+                    : "bg-white border-transparent hover:bg-blue-50 hover:border-blue-200"
+                    }`}
                   onClick={() => dispatch(setCurrentProjectStep(idx + 1))}
                 >
                   <div
-                    className={`w-6 h-6 flex items-center justify-center rounded-full ${
-                      isActive
-                        ? "bg-blue-600"
-                        : "border-2 border-slate-300 bg-white"
-                    }`}
+                    className={`w-6 h-6 flex items-center justify-center rounded-full ${isActive
+                      ? "bg-blue-600"
+                      : "border-2 border-slate-300 bg-white"
+                      }`}
                   >
                     {isActive ? (
                       step.icon
@@ -62,11 +60,10 @@ export default function Sidebar() {
                     )}
                   </div>
                   <span
-                    className={`text-sm ${
-                      isActive
-                        ? "font-semibold text-blue-900"
-                        : "font-normal text-slate-900"
-                    }`}
+                    className={`text-sm ${isActive
+                      ? "font-semibold text-blue-900"
+                      : "font-normal text-slate-900"
+                      }`}
                   >
                     {step.label}
                   </span>
@@ -146,7 +143,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-72 h-full bg-white border-r border-gray-100 shadow-sm h-screen flex flex-col justify-between">
+    <aside className="w-72 h-[100%] bg-white border-r border-gray-100 shadow-sm h-screen flex flex-col justify-between">
       <div className="p-6">
         <nav className="space-y-2">
           {/* Projects */}
@@ -211,7 +208,7 @@ export default function Sidebar() {
         )}
 
         {/* Analytics Section */}
-        <div className="mt-8">
+        {/* <div className="mt-8">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Analytics</h3>
           <div className="space-y-4">
             <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
@@ -232,11 +229,11 @@ export default function Sidebar() {
               <p className="text-xs text-green-700">+5% from last month</p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Footer */}
-      <div className="p-6 border-t border-gray-100">
+      {/* <div className="p-6 border-t border-gray-100">
         <div className="space-y-2">
           <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
             <FaCog className="text-gray-500" />
@@ -247,7 +244,7 @@ export default function Sidebar() {
             <span className="text-sm font-medium text-gray-700">Help</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </aside>
   );
 }
