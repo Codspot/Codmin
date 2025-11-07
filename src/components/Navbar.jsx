@@ -122,7 +122,11 @@ export default function Navbar() {
     <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
       {/* Left: Logo + Title */}
       <div className="flex flex-col items-start justify-center">
-        <img src={process.env.PUBLIC_URL + '/logo1.png'} alt="Codspot Logo" className="h-8 w-18 mb-1 object-contain" />
+        <img
+          src={process.env.PUBLIC_URL + "/logo1.png"}
+          alt="Codspot Logo"
+          className="h-8 w-18 mb-1 object-contain"
+        />
         <span className="text-xs text-gray-500 -mt-1 ml-2">Admin Panel</span>
       </div>
 

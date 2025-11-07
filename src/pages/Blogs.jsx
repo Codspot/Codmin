@@ -38,17 +38,18 @@ export default function Blogs() {
   }, []);
 
   // Filter blogs based on search term
-  const filteredBlogs = blogs.filter(blog =>
-    blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    blog.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBlogs = blogs.filter(
+    (blog) =>
+      blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blog.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -74,7 +75,7 @@ export default function Blogs() {
             <FaFilter className="text-gray-600" />
           </button>
           <button
-            onClick={() => window.location.href = "/create-blog"}
+            onClick={() => (window.location.href = "/create-blog")}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition"
           >
             <FaPlus className="text-sm" />
@@ -93,7 +94,9 @@ export default function Blogs() {
           <div className="p-8 text-center text-red-500">{error}</div>
         ) : filteredBlogs.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            {searchTerm ? "No blog posts match your search." : "No blog posts found. Create your first blog post!"}
+            {searchTerm
+              ? "No blog posts match your search."
+              : "No blog posts found. Create your first blog post!"}
           </div>
         ) : (
           <table className="min-w-full text-sm text-left">
@@ -117,14 +120,16 @@ export default function Blogs() {
                     </div>
                     {blog.excerpt && (
                       <div className="text-gray-500 text-xs mt-1">
-                        {blog.excerpt.length > 100 
-                          ? blog.excerpt.substring(0, 100) + '...' 
+                        {blog.excerpt.length > 100
+                          ? blog.excerpt.substring(0, 100) + "..."
                           : blog.excerpt}
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
-                    {blog.published_at ? formatDate(blog.published_at) : formatDate(blog.date)}
+                    {blog.published_at
+                      ? formatDate(blog.published_at)
+                      : formatDate(blog.date)}
                   </td>
                   <td className="px-6 py-4">
                     <span

@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes, FaImage, FaVideo, FaFile, FaUpload, FaCheck, FaSearch } from "react-icons/fa";
+import {
+  FaTimes,
+  FaImage,
+  FaVideo,
+  FaFile,
+  FaUpload,
+  FaCheck,
+  FaSearch,
+} from "react-icons/fa";
 import { supabase } from "../supabaseClient";
 
-export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple = false }) {
+export default function MediaSelector({
+  isOpen,
+  onClose,
+  onSelect,
+  allowMultiple = false,
+}) {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,16 +39,17 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
         .list("media", {
           limit: 100,
           offset: 0,
-          sortBy: { column: "created_at", order: "desc" }
+          sortBy: { column: "created_at", order: "desc" },
         });
 
       if (error) throw error;
 
       // Only get files (filter out any folders and placeholder files)
-      const files = data.filter(item => 
-        item.name.includes('.') && 
-        !item.name.startsWith('.emptyFolderPlaceholder') &&
-        !item.name.startsWith('.') // Filter out any hidden files
+      const files = data.filter(
+        (item) =>
+          item.name.includes(".") &&
+          !item.name.startsWith(".emptyFolderPlaceholder") &&
+          !item.name.startsWith(".") // Filter out any hidden files
       );
 
       // Get public URLs for all files
@@ -44,12 +58,12 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
           const { data: urlData } = supabase.storage
             .from("media")
             .getPublicUrl(`media/${file.name}`);
-          
+
           return {
             ...file,
             url: urlData.publicUrl,
             type: getFileType(file.name),
-            size: formatFileSize(file.metadata?.size || 0)
+            size: formatFileSize(file.metadata?.size || 0),
           };
         })
       );
@@ -63,36 +77,39 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
   };
 
   const getFileType = (fileName) => {
-    const extension = fileName.split('.').pop().toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return 'image';
-    if (['mp4', 'avi', 'mov', 'wmv', 'flv'].includes(extension)) return 'video';
-    return 'document';
+    const extension = fileName.split(".").pop().toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension))
+      return "image";
+    if (["mp4", "avi", "mov", "wmv", "flv"].includes(extension)) return "video";
+    return "document";
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const handleFileUpload = async (files) => {
     if (!files || files.length === 0) return;
-    
+
     setUploading(true);
     const uploadPromises = Array.from(files).map(async (file) => {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 8)}.${fileExt}`;
-      
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 8)}.${fileExt}`;
+
       try {
         const { data, error } = await supabase.storage
           .from("media")
-          .upload(`media/${fileName}`, file, { 
+          .upload(`media/${fileName}`, file, {
             upsert: false,
-            cacheControl: '3600'
+            cacheControl: "3600",
           });
-          
+
         if (error) throw error;
         return { success: true, fileName };
       } catch (error) {
@@ -103,8 +120,8 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
 
     try {
       const results = await Promise.all(uploadPromises);
-      const successful = results.filter(r => r.success).length;
-      
+      const successful = results.filter((r) => r.success).length;
+
       if (successful > 0) {
         await fetchMedia(); // Refresh the media list
       }
@@ -117,9 +134,13 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
 
   const handleItemSelect = (item) => {
     if (allowMultiple) {
-      const isSelected = selectedItems.find(selected => selected.name === item.name);
+      const isSelected = selectedItems.find(
+        (selected) => selected.name === item.name
+      );
       if (isSelected) {
-        setSelectedItems(selectedItems.filter(selected => selected.name !== item.name));
+        setSelectedItems(
+          selectedItems.filter((selected) => selected.name !== item.name)
+        );
       } else {
         setSelectedItems([...selectedItems, item]);
       }
@@ -136,14 +157,19 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
 
   const getFileIcon = (type) => {
     switch (type) {
-      case 'image': return <FaImage className="w-8 h-8 text-blue-500" />;
-      case 'video': return <FaVideo className="w-8 h-8 text-red-500" />;
-      default: return <FaFile className="w-8 h-8 text-gray-500" />;
+      case "image":
+        return <FaImage className="w-8 h-8 text-blue-500" />;
+      case "video":
+        return <FaVideo className="w-8 h-8 text-red-500" />;
+      default:
+        return <FaFile className="w-8 h-8 text-gray-500" />;
     }
   };
 
-  const filteredMedia = media.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredMedia = media.filter((item) => {
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || item.type === filterType;
     return matchesSearch && matchesType;
   });
@@ -156,8 +182,12 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Select Media</h2>
-            <p className="text-gray-600">Choose from your media library or upload new files</p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Select Media
+            </h2>
+            <p className="text-gray-600">
+              Choose from your media library or upload new files
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -179,7 +209,7 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
-          
+
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -234,19 +264,27 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
               {filteredMedia.length === 0 ? (
                 <div className="text-center py-12">
                   <FaImage className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No media files</h3>
-                  <p className="text-gray-600 mb-4">Upload your first file to get started</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No media files
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Upload your first file to get started
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {filteredMedia.map((item) => {
-                    const isSelected = selectedItems.find(selected => selected.name === item.name);
+                    const isSelected = selectedItems.find(
+                      (selected) => selected.name === item.name
+                    );
                     return (
                       <div
                         key={item.name}
                         onClick={() => handleItemSelect(item)}
                         className={`bg-white border-2 rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg ${
-                          isSelected ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'
+                          isSelected
+                            ? "border-emerald-500 bg-emerald-50"
+                            : "border-gray-200 hover:border-gray-300"
                         } relative`}
                       >
                         {/* Selection indicator */}
@@ -255,12 +293,12 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
                             <FaCheck className="w-3 h-3" />
                           </div>
                         )}
-                        
+
                         <div className="h-40 overflow-hidden">
-                          {item.type === 'image' ? (
-                            <img 
+                          {item.type === "image" ? (
+                            <img
                               className="w-full h-full object-cover"
-                              src={item.url} 
+                              src={item.url}
                               alt={item.name}
                               loading="lazy"
                             />
@@ -271,7 +309,10 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
                           )}
                         </div>
                         <div className="p-3">
-                          <h3 className="text-sm font-medium text-gray-900 truncate" title={item.name}>
+                          <h3
+                            className="text-sm font-medium text-gray-900 truncate"
+                            title={item.name}
+                          >
                             {item.name}
                           </h3>
                           <p className="text-xs text-gray-500">{item.size}</p>
@@ -289,7 +330,8 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
         {allowMultiple && (
           <div className="flex items-center justify-between p-6 border-t bg-gray-50">
             <p className="text-sm text-gray-600">
-              {selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} selected
+              {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""}{" "}
+              selected
             </p>
             <div className="flex space-x-3">
               <button
@@ -303,7 +345,8 @@ export default function MediaSelector({ isOpen, onClose, onSelect, allowMultiple
                 disabled={selectedItems.length === 0}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Select {selectedItems.length > 0 ? `(${selectedItems.length})` : ''}
+                Select{" "}
+                {selectedItems.length > 0 ? `(${selectedItems.length})` : ""}
               </button>
             </div>
           </div>
