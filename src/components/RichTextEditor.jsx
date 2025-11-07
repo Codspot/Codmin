@@ -120,32 +120,15 @@ function ToolbarPlugin({ onFormat }) {
       editor.update(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-          // Create an HTML image element for display in editor
-          const imageElement = document.createElement("img");
-          imageElement.src = imageUrl;
-          imageElement.alt = file.name;
-          imageElement.style.maxWidth = "100%";
-          imageElement.style.height = "auto";
-          imageElement.style.margin = "16px 0";
-          imageElement.style.borderRadius = "8px";
-          imageElement.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-          imageElement.dataset.imageUrl = imageUrl;
-          imageElement.dataset.altText = file.name;
-
-          // Insert the image element directly into the contentEditable
-          const editorElement = document.querySelector(
-            '[contenteditable="true"]'
+          // Create a new paragraph with the image HTML
+          const paragraph = $createParagraphNode();
+          const imageText = $createTextNode(
+            `📷 Image: ${file.name} - ${imageUrl}`
           );
-          if (editorElement && selection.anchor.getNode()) {
-            const range = selection.getRangeAt ? selection.getRangeAt(0) : null;
-            if (range) {
-              range.insertNode(imageElement);
+          paragraph.append(imageText);
 
-              // Add line break after image
-              const br = document.createElement("br");
-              range.insertNode(br);
-            }
-          }
+          // Insert the paragraph
+          selection.insertNodes([paragraph]);
         }
       });
     } catch (error) {
@@ -577,9 +560,22 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
       for (const file of imageFiles) {
         const imageUrl = await uploadImageToSupabase(file);
 
-        // Insert image into editor
-        // This would need to be handled by the editor instance
-        console.log("Image uploaded:", imageUrl);
+        // Insert image reference as text in the editor
+        const imageText = `📷 Image: ${file.name} - ${imageUrl}`;
+
+        // Find the contentEditable element and insert the text
+        const contentEditable = document.querySelector(
+          '[contenteditable="true"]'
+        );
+        if (contentEditable) {
+          // Focus the editor
+          contentEditable.focus();
+
+          // Insert the image reference text
+          document.execCommand("insertText", false, imageText + "\n");
+        }
+
+        console.log("Image uploaded and inserted:", imageUrl);
       }
     } catch (error) {
       console.error("Failed to upload images:", error);
@@ -614,27 +610,30 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
         <LexicalComposer initialConfig={initialConfig}>
           <ToolbarPlugin />
           <div
-            className={`relative flex-1 ${
+            className={`relative flex-1 min-h-0 overflow-hidden ${
               isDragOver ? "bg-blue-50 border-blue-300" : ""
             } ${isUploading ? "opacity-75" : ""}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <RichTextPlugin
-              contentEditable={
-                <ContentEditable
-                  className="p-6 min-h-full outline-none focus:outline-none resize-none text-gray-900 leading-relaxed prose prose-lg max-w-none"
-                  style={{
-                    fontSize: "16px",
-                    lineHeight: "1.6",
-                    minHeight: "500px",
-                  }}
-                />
-              }
-              placeholder={<Placeholder />}
-              ErrorBoundary={LexicalErrorBoundary}
-            />
+            <div className="h-full overflow-y-auto">
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    className="p-6 outline-none focus:outline-none resize-none text-gray-900 leading-relaxed prose prose-lg max-w-none min-h-full"
+                    style={{
+                      fontSize: "16px",
+                      lineHeight: "1.6",
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  />
+                }
+                placeholder={<Placeholder />}
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+            </div>
             <OnChangePlugin onChange={handleChange} />
             <HistoryPlugin />
 

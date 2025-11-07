@@ -443,11 +443,11 @@ export default function CreateBlog() {
           <div className="grid grid-cols-12 gap-6 h-full">
             {/* Left Sidebar */}
             <aside className="col-span-12 lg:col-span-4 xl:col-span-3">
-              <div 
+              <div
                 className="h-[calc(100vh-8rem)] overflow-y-hidden hover:overflow-y-auto space-y-6 pb-6 pr-2 transition-all duration-200 custom-scrollbar"
                 style={{
-                  scrollbarWidth: 'none', /* Firefox */
-                  msOverflowStyle: 'none', /* Internet Explorer 10+ */
+                  scrollbarWidth: "none" /* Firefox */,
+                  msOverflowStyle: "none" /* Internet Explorer 10+ */,
                 }}
               >
                 {/* Blog Title & Excerpt */}
