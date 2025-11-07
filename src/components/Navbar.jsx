@@ -126,24 +126,8 @@ export default function Navbar() {
         <span className="text-xs text-gray-500 -mt-1 ml-2">Admin Panel</span>
       </div>
 
-      {/* Right: Buttons + Avatar + Notification */}
+      {/* Right: Avatar + Notification */}
       <div className="flex items-center space-x-4">
-        <Link
-          to="/projects/new"
-          className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow"
-        >
-          <FaPlus className="mr-2 text-xs" />
-          New Project
-        </Link>
-
-        <Link
-          to="/blogs/new"
-          className="flex items-center bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow"
-        >
-          <FaPen className="mr-2 text-xs" />
-          New Blog
-        </Link>
-
         <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-300">
           <img
             src="https://i.pravatar.cc/40?img=3"

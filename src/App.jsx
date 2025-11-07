@@ -8,6 +8,7 @@ import Projects from './pages/Projects.jsx';
 import CreateProject from './pages/CreateProject.jsx';
 import Blogs from './pages/Blogs.jsx';
 import CreateBlog from './pages/CreateBlog.jsx';
+import Media from './pages/Media.jsx';
 import Login from './pages/Login.jsx';
 import RequireAuth from './components/RequireAuth.jsx';
 
@@ -19,6 +20,11 @@ function App() {
           <Route
             path="/login"
             element={<Login />}
+          />
+          {/* Full-screen Blog Editor Route */}
+          <Route
+            path="/create-blog"
+            element={<RequireAuth><CreateBlog /></RequireAuth>}
           />
           <Route
             path="*"
@@ -35,7 +41,7 @@ function App() {
                       <Route path="/projects" element={<RequireAuth><Projects /></RequireAuth>} />
                       <Route path="/projects/new" element={<RequireAuth><CreateProject /></RequireAuth>} />
                       <Route path="/blogs" element={<RequireAuth><Blogs /></RequireAuth>} />
-                      <Route path="/blogs/new" element={<RequireAuth><CreateBlog /></RequireAuth>} />
+                      <Route path="/media" element={<RequireAuth><Media /></RequireAuth>} />
                     </Routes>
                   </div>
                 </div>

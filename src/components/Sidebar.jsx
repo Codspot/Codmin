@@ -186,16 +186,45 @@ export default function Sidebar() {
             )}
           </NavLink>
 
-          {/* Media (non-clickable for now) */}
-          <div className="group flex items-center justify-between px-4 py-3 rounded-xl border border-transparent hover:bg-gray-50 transition-all duration-200 cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gray-100 group-hover:bg-purple-100 rounded-lg flex items-center justify-center transition-colors">
-                <FaImage className="text-gray-600 group-hover:text-purple-600 text-sm" />
+          {/* Media */}
+          <NavLink
+            to="/media"
+            className={({ isActive }) =>
+              `group flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 ${
+                isActive
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  : "border-transparent hover:bg-gray-50"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                    isActive 
+                      ? "bg-emerald-100" 
+                      : "bg-gray-100 group-hover:bg-purple-100"
+                  }`}>
+                    <FaImage className={`text-sm transition-colors ${
+                      isActive 
+                        ? "text-emerald-600" 
+                        : "text-gray-600 group-hover:text-purple-600"
+                    }`} />
+                  </div>
+                  <span className={`font-medium transition-colors ${
+                    isActive 
+                      ? "text-emerald-700" 
+                      : "text-gray-700 group-hover:text-gray-900"
+                  }`}>Media</span>
+                </div>
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  isActive 
+                    ? "bg-emerald-100 text-emerald-700" 
+                    : "bg-gray-100 text-gray-600"
+                }`}>24</span>
               </div>
-              <span className="font-medium text-gray-700 group-hover:text-gray-900">Media</span>
-            </div>
-            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">24</span>
-          </div>
+            )}
+          </NavLink>
         </nav>
 
         {/* Conditional button for createProject screen */}
