@@ -382,7 +382,7 @@ export default function CreateBlog() {
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+      <header className="bg-white border-b border-gray-200 flex-shrink-0">
         <div className="mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <button
@@ -438,12 +438,18 @@ export default function CreateBlog() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow px-4 py-6 lg:px-6 lg:py-8 min-h-0 flex flex-col">
-        <div className="flex-1 flex min-h-0 max-w-none">
-          <div className="grid grid-cols-12 gap-6 w-full min-h-full">
+      <main className="flex-1 px-4 py-6 lg:px-6 lg:py-8 min-h-0 overflow-hidden">
+        <div className="h-full">
+          <div className="grid grid-cols-12 gap-6 h-full">
             {/* Left Sidebar */}
             <aside className="col-span-12 lg:col-span-4 xl:col-span-3">
-              <div className="h-full overflow-y-auto space-y-6 pb-6">
+              <div 
+                className="h-[calc(100vh-8rem)] overflow-y-hidden hover:overflow-y-auto space-y-6 pb-6 pr-2 transition-all duration-200 custom-scrollbar"
+                style={{
+                  scrollbarWidth: 'none', /* Firefox */
+                  msOverflowStyle: 'none', /* Internet Explorer 10+ */
+                }}
+              >
                 {/* Blog Title & Excerpt */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 space-y-4">
                   <div>
@@ -639,9 +645,9 @@ export default function CreateBlog() {
             </aside>
 
             {/* Main Content Area */}
-            <div className="col-span-12 lg:col-span-8 xl:col-span-9 min-h-0 flex">
-              {/* Content Editor - Full Space */}
-              <div className="flex-1 pb-6">
+            <div className="col-span-12 lg:col-span-8 xl:col-span-9">
+              {/* Content Editor - Fixed Height */}
+              <div className="h-[calc(100vh-8rem)] mb-6">
                 <RichTextEditor
                   value={formData.content}
                   onChange={(content) => handleChange("content", content)}
